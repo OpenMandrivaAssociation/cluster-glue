@@ -18,6 +18,7 @@ License:	GPLv2+ and LGPLv2+
 Url:		http://linux-ha.org/wiki/Cluster_Glue
 Group:		System/Libraries
 Source0:	http://hg.linux-ha.org/glue/archive/%{upstreamversion}.tar.bz2
+Patch0:		glue-1.0.8-gtypes.patch
 # Directives to allow upgrade from combined heartbeat packages in Fedora11
 Provides:	heartbeat-stonith = 3.0.0-1
 Provides:	heartbeat-pils = 3.0.0-1
@@ -50,6 +51,7 @@ standards, and an interface to common STONITH devices.
 
 %prep
 %setup -q -n %{upstreamprefix}%{upstreamversion}
+%patch0 -p1 -b .gtypes
 
 %build
 ./autogen.sh
