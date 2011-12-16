@@ -13,7 +13,7 @@
 Name:		cluster-glue
 Summary:	Reusable cluster components
 Version:	1.0.9
-Release:	%mkrel 1
+Release:	2
 License:	GPLv2+ and LGPLv2+
 Url:		http://linux-ha.org/wiki/Cluster_Glue
 Group:		System/Libraries
@@ -73,9 +73,6 @@ find %{buildroot} -name '*.la' -exec rm {} \;
 # Don't package things we wont support
 rm -f %{buildroot}/%{_libdir}/stonith/plugins/stonith2/rhcs.*
 
-%clean
-rm -rf %{buildroot}
-
 %pre
 %_pre_useradd %{uname} %{_var}/lib/heartbeat/cores/hacluster /bin/false
 %_pre_groupadd %{gname} %{uname}
@@ -85,7 +82,6 @@ rm -rf %{buildroot}
 %_postun_groupdel %{gname}
 
 %files
-%defattr(-,root,root)
 %{_sbindir}/cibsecret
 %{_sbindir}/ha_logger
 %{_sbindir}/hb_report
@@ -236,7 +232,6 @@ Headers and shared libraries for a useful for writing cluster managers
 such as Pacemaker.
 
 %files devel
-%defattr(-,root,root)
 %dir %{_libdir}/heartbeat
 %dir %{_libdir}/heartbeat/plugins
 %dir %{_libdir}/heartbeat/plugins/test
@@ -254,4 +249,3 @@ such as Pacemaker.
 %{_includedir}/pils
 %{_datadir}/cluster-glue/lrmtest
 %{_libdir}/heartbeat/plugins/test/test.so
-
