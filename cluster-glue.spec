@@ -12,13 +12,12 @@
 
 Name:		cluster-glue
 Summary:	Reusable cluster components
-Version:	1.0.9
-Release:	2
+Version:	1.0.10
+Release:	%mkrel 1
 License:	GPLv2+ and LGPLv2+
 Url:		http://linux-ha.org/wiki/Cluster_Glue
 Group:		System/Libraries
 Source0:	http://hg.linux-ha.org/glue/archive/%{upstreamversion}.tar.bz2
-Patch0:		glue-1.0.8-gtypes.patch
 # Directives to allow upgrade from combined heartbeat packages in Fedora11
 Provides:	heartbeat-stonith = 3.0.0-1
 Provides:	heartbeat-pils = 3.0.0-1
@@ -28,7 +27,7 @@ Conflicts:	heartbeat < 3.0.0-1
 
 # Build dependencies
 Requires: perl-TimeDate
-BuildRequires: libltdl-devel
+BuildRequires: libtool-devel
 BuildRequires: bzip2-devel
 BuildRequires: glib2-devel
 BuildRequires: python-devel
@@ -51,7 +50,6 @@ standards, and an interface to common STONITH devices.
 
 %prep
 %setup -q -n %{upstreamprefix}%{upstreamversion}
-%patch0 -p1 -b .gtypes
 
 %build
 ./autogen.sh
@@ -73,6 +71,9 @@ find %{buildroot} -name '*.la' -exec rm {} \;
 # Don't package things we wont support
 rm -f %{buildroot}/%{_libdir}/stonith/plugins/stonith2/rhcs.*
 
+%clean
+rm -rf %{buildroot}
+
 %pre
 %_pre_useradd %{uname} %{_var}/lib/heartbeat/cores/hacluster /bin/false
 %_pre_groupadd %{gname} %{uname}
@@ -82,6 +83,7 @@ rm -f %{buildroot}/%{_libdir}/stonith/plugins/stonith2/rhcs.*
 %_postun_groupdel %{gname}
 
 %files
+%defattr(-,root,root)
 %{_sbindir}/cibsecret
 %{_sbindir}/ha_logger
 %{_sbindir}/hb_report
@@ -99,6 +101,8 @@ rm -f %{buildroot}/%{_libdir}/stonith/plugins/stonith2/rhcs.*
 %{_libdir}/heartbeat/ha_logd
 %{_libdir}/heartbeat/plugins/RAExec/*.so
 %{_libdir}/heartbeat/plugins/InterfaceMgr/*.so
+%{_libdir}/heartbeat/plugins/compress/bz2.so
+%{_libdir}/heartbeat/plugins/compress/zlib.so
 
 %dir %{_libdir}/stonith
 %dir %{_libdir}/stonith/plugins
@@ -232,6 +236,7 @@ Headers and shared libraries for a useful for writing cluster managers
 such as Pacemaker.
 
 %files devel
+%defattr(-,root,root)
 %dir %{_libdir}/heartbeat
 %dir %{_libdir}/heartbeat/plugins
 %dir %{_libdir}/heartbeat/plugins/test
@@ -249,3 +254,19 @@ such as Pacemaker.
 %{_includedir}/pils
 %{_datadir}/cluster-glue/lrmtest
 %{_libdir}/heartbeat/plugins/test/test.so
+
+
+
+%changelog
+* Fri Dec 16 2011 Alexander Khrukin <akhrukin@mandriva.org> 1.0.9-1mdv2011.0
++ Revision: 742710
+- version update 1.0.9
+
+* Thu Nov 03 2011 Andrey Bondrov <abondrov@mandriva.org> 1.0.8-1
++ Revision: 716120
+- Add patch0 to fix build issues with glib
+- imported package cluster-glue
+
+  + Leonardo Coelho <leonardoc@mandriva.org>
+    - Created package structure for cluster-glue.
+
