@@ -13,11 +13,12 @@
 Name:		cluster-glue
 Summary:	Reusable cluster components
 Version:	1.0.10
-Release:	%mkrel 1
+Release:	2
 License:	GPLv2+ and LGPLv2+
 Url:		http://linux-ha.org/wiki/Cluster_Glue
 Group:		System/Libraries
 Source0:	http://hg.linux-ha.org/glue/archive/%{upstreamversion}.tar.bz2
+Patch0:		cluster-glue-automake-1.13.patch
 # Directives to allow upgrade from combined heartbeat packages in Fedora11
 Provides:	heartbeat-stonith = 3.0.0-1
 Provides:	heartbeat-pils = 3.0.0-1
@@ -50,6 +51,7 @@ standards, and an interface to common STONITH devices.
 
 %prep
 %setup -q -n %{upstreamprefix}%{upstreamversion}
+%apply_patches
 
 %build
 ./autogen.sh

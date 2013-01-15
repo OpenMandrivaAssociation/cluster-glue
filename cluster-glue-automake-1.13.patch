@@ -1,0 +1,11 @@
+--- Reusable-Cluster-Components-glue--glue-1.0.10/configure.ac.bero	2013-01-15 18:56:11.454034587 +0100
++++ Reusable-Cluster-Components-glue--glue-1.0.10/configure.ac	2013-01-15 18:56:18.618948388 +0100
+@@ -41,7 +41,7 @@ dnl   - Manually edit include/crm_config
+ dnl     new defines
+ dnl   - Should not include HAVE_* defines
+ dnl   - Safe to include anywhere
+-AM_CONFIG_HEADER(include/config.h include/glue_config.h)
++AC_CONFIG_HEADERS([include/config.h include/glue_config.h])
+ ALL_LINGUAS="en fr"
+ 
+ AC_ARG_WITH(version,
