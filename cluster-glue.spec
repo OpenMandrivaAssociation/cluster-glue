@@ -29,6 +29,7 @@ Group:		System/Libraries
 Source0:	http://hg.linux-ha.org/glue/archive/%{upstreamversion}.tar.bz2
 Patch0:		cluster-glue-automake-1.13.patch
 
+BuildRequires:	docbook-dtd44-xml
 BuildRequires:	docbook-style-xsl
 BuildRequires:	xsltproc
 BuildRequires:	bzip2-devel
@@ -103,11 +104,12 @@ Headers and shared libraries for a useful for writing cluster managers
 such as Pacemaker.
 
 %prep
-%setup -q -n %{upstreamprefix}%{upstreamversion}
+%setup -qn %{upstreamprefix}%{upstreamversion}
 %apply_patches
 
 %build
-./autogen.sh
+#./autogen.sh
+autoreconf -fi
 %configure2_5x \
 	--disable-static \
 	--enable-fatal-warnings=no   \
@@ -144,6 +146,7 @@ rm -f %{buildroot}/%{_libdir}/stonith/plugins/stonith2/rhcs.*
 
 %dir %{_libdir}/heartbeat
 %dir %{_libdir}/heartbeat/plugins
+%dir %{_libdir}/heartbeat/plugins/compress
 %dir %{_libdir}/heartbeat/plugins/RAExec
 %dir %{_libdir}/heartbeat/plugins/InterfaceMgr
 %{_libdir}/heartbeat/lrmd
