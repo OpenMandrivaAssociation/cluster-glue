@@ -1,6 +1,15 @@
-%define gname haclient
-%define uname hacluster
-%define nogroup nobody
+%define gname	haclient
+%define uname	hacluster
+%define nogroup	nobody
+%define maj1	1
+%define major	2
+%define liblrm		%mklibname lrm %{major}
+%define libpils		%mklibname pils %{major}
+%define libplumb 	%mklibname plumb %{major}
+%define libplumbgpl	%mklibname plumbgpl %{major}
+%define libstonith	%mklibname stonith %{maj1}
+%define devname	%mklibname %{name} -d
+
 
 # When downloading directly from Mercurial, it will automatically add this prefix
 # Invoking 'hg archive' wont but you can add one with: hg archive -t tgz -p "Reusable-Cluster-Components-" -r $upstreamversion $upstreamversion.tar.gz
@@ -10,38 +19,28 @@
 # Keep around for when/if required
 #global alphatag %{upstreamversion}.hg
 
-Name:		cluster-glue
 Summary:	Reusable cluster components
+Name:		cluster-glue
 Version:	1.0.10
-Release:	2
+Release:	3
 License:	GPLv2+ and LGPLv2+
 Url:		http://linux-ha.org/wiki/Cluster_Glue
 Group:		System/Libraries
 Source0:	http://hg.linux-ha.org/glue/archive/%{upstreamversion}.tar.bz2
 Patch0:		cluster-glue-automake-1.13.patch
-# Directives to allow upgrade from combined heartbeat packages in Fedora11
-Provides:	heartbeat-stonith = 3.0.0-1
-Provides:	heartbeat-pils = 3.0.0-1
-Obsoletes:	heartbeat-stonith < 3.0.0-1
-Obsoletes:	heartbeat-pils < 3.0.0-1
-Conflicts:	heartbeat < 3.0.0-1
 
-# Build dependencies
-Requires: perl-TimeDate
-BuildRequires: libtool-devel
-BuildRequires: bzip2-devel
-BuildRequires: glib2-devel
-BuildRequires: python-devel
-BuildRequires: libxml2-devel
-
-# For documentation
-BuildRequires: xsltproc docbook-style-xsl
-
-# For additional Stonith plugins
-BuildRequires: net-snmp-devel
-BuildRequires: openipmi-devel
-BuildRequires: curl-devel
-BuildRequires: libuuid-devel
+BuildRequires:	docbook-style-xsl
+BuildRequires:	xsltproc
+BuildRequires:	bzip2-devel
+BuildRequires:	libtool-devel
+BuildRequires:	net-snmp-devel
+BuildRequires:	pkgconfig(glib-2.0)
+BuildRequires:	pkgconfig(libcurl)
+BuildRequires:	pkgconfig(libxml-2.0)
+BuildRequires:	pkgconfig(OpenIPMI)
+BuildRequires:	pkgconfig(python)
+BuildRequires:	pkgconfig(uuid)
+Requires:	perl-TimeDate
 
 %description
 A collection of common tools that are useful for writing cluster managers
@@ -49,32 +48,80 @@ such as Pacemaker.
 Provides a local resource manager that understands the OCF and LSB
 standards, and an interface to common STONITH devices.
 
+%package -n %{liblrm}
+Summary:	Reusable cluster libraries
+Group:		System/Libraries
+
+%description -n %{liblrm}
+A collection of libraries that are useful for writing cluster managers
+such as Pacemaker.
+
+%package -n %{libpils}
+Summary:	Reusable cluster libraries
+Group:		System/Libraries
+
+%description -n %{libpils}
+A collection of libraries that are useful for writing cluster managers
+such as Pacemaker.
+
+%package -n %{libplumb}
+Summary:	Reusable cluster libraries
+Group:		System/Libraries
+
+%description -n %{libplumb}
+A collection of libraries that are useful for writing cluster managers
+such as Pacemaker.
+
+%package -n %{libplumbgpl}
+Summary:	Reusable cluster libraries
+Group:		System/Libraries
+
+%description -n %{libplumbgpl}
+A collection of libraries that are useful for writing cluster managers
+such as Pacemaker.
+
+%package -n %{libstonith}
+Summary:	Reusable cluster libraries
+Group:		System/Libraries
+
+%description -n %{libstonith}
+A collection of libraries that are useful for writing cluster managers
+such as Pacemaker.
+
+%package -n %{devname} 
+Summary:	Headers and libraries for writing cluster managers
+Group:		Development/Other
+Requires:	%{liblrm} = %{version}-%{release}
+Requires:	%{libpils} = %{version}-%{release}
+Requires:	%{libplumb} = %{version}-%{release}
+Requires:	%{libplumbgpl} = %{version}-%{release}
+Requires:	%{libstonith} = %{version}-%{release}
+%rename		%{name}-devel
+
+%description -n %{devname}
+Headers and shared libraries for a useful for writing cluster managers 
+such as Pacemaker.
+
 %prep
 %setup -q -n %{upstreamprefix}%{upstreamversion}
 %apply_patches
 
 %build
 ./autogen.sh
-%configure2_5x --disable-static \
-		--enable-fatal-warnings=no   \
-		--localstatedir=%{_var}      \
-		--with-daemon-group=%{gname} \
-		--with-daemon-user=%{uname}
+%configure2_5x \
+	--disable-static \
+	--enable-fatal-warnings=no   \
+	--localstatedir=%{_var}      \
+	--with-daemon-group=%{gname} \
+	--with-daemon-user=%{uname}
 
 %make
 
 %install
 %makeinstall_std
 
-## tree fix up
-# Dont package static libs
-find %{buildroot} -name '*.la' -exec rm {} \;
-
 # Don't package things we wont support
 rm -f %{buildroot}/%{_libdir}/stonith/plugins/stonith2/rhcs.*
-
-%clean
-rm -rf %{buildroot}
 
 %pre
 %_pre_useradd %{uname} %{_var}/lib/heartbeat/cores/hacluster /bin/false
@@ -85,7 +132,7 @@ rm -rf %{buildroot}
 %_postun_groupdel %{gname}
 
 %files
-%defattr(-,root,root)
+%doc AUTHORS COPYING
 %{_sbindir}/cibsecret
 %{_sbindir}/ha_logger
 %{_sbindir}/hb_report
@@ -114,131 +161,35 @@ rm -rf %{buildroot}
 %{_libdir}/stonith/plugins/stonith2/*.so
 %{_libdir}/stonith/plugins/stonith2/*.py*
 %{_libdir}/stonith/plugins/xen0-ha-dom0-stonith-helper
-
 %dir %{_datadir}/cluster-glue
 %{_datadir}/cluster-glue/ha_cf_support.sh
 %{_datadir}/cluster-glue/openais_conf_support.sh
 %{_datadir}/cluster-glue/utillib.sh
 %{_datadir}/cluster-glue/combine-logs.pl
-
 %dir %{_var}/lib/heartbeat
 %dir %{_var}/lib/heartbeat/cores
 %dir %attr (0700, root, root)		%{_var}/lib/heartbeat/cores/root
 %dir %attr (0700, nobody, %{nogroup})	%{_var}/lib/heartbeat/cores/nobody
 %dir %attr (0700, %{uname}, %{gname})	%{_var}/lib/heartbeat/cores/%{uname}
-
-#doc %{_datadir}/doc/cluster-glue/stonith
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man8/*
-%doc AUTHORS
-%doc COPYING
 
-#---------------------------------------------------------
-%define lrmmajor 2
-%define liblrm %mklibname lrm %lrmmajor
+%files -n %{liblrm}
+%{_libdir}/liblrm.so.%{major}*
 
-%package -n %liblrm
-Summary:	Reusable cluster libraries
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+%files -n %{libpils}
+%{_libdir}/libpils.so.%{major}*
 
-%description -n %liblrm
-A collection of libraries that are useful for writing cluster managers
-such as Pacemaker.
+%files -n %{libplumb}
+%{_libdir}/libplumb.so.%{major}*
 
-%files -n %liblrm
-%{_libdir}/liblrm.so.%{lrmmajor}
-%{_libdir}/liblrm.so.%{lrmmajor}.*
+%files -n %{libplumbgpl}
+%{_libdir}/libplumbgpl.so.%{major}*
 
-#---------------------------------------------------------
-%define pilsmajor 2
-%define libpils %mklibname pils %pilsmajor
+%files -n %{libstonith}
+%{_libdir}/libstonith.so.%{maj1}*
 
-%package -n %libpils
-Summary:	Reusable cluster libraries
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-
-%description -n %libpils
-A collection of libraries that are useful for writing cluster managers
-such as Pacemaker.
-
-%files -n %libpils
-%{_libdir}/libpils.so.%{pilsmajor}
-%{_libdir}/libpils.so.%{pilsmajor}.*
-
-#---------------------------------------------------------
-%define plumbmajor 2
-%define libplumb %mklibname plumb %plumbmajor
-
-%package -n %libplumb
-Summary:	Reusable cluster libraries
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-
-%description -n %libplumb
-A collection of libraries that are useful for writing cluster managers
-such as Pacemaker.
-
-%files -n %libplumb
-%{_libdir}/libplumb.so.%{plumbmajor}
-%{_libdir}/libplumb.so.%{plumbmajor}.*
-
-#---------------------------------------------------------
-%define plumbgplmajor 2
-%define libplumbgpl %mklibname plumbgpl %plumbgplmajor
-
-%package -n %libplumbgpl
-Summary:	Reusable cluster libraries
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-
-%description -n %libplumbgpl
-A collection of libraries that are useful for writing cluster managers
-such as Pacemaker.
-
-%files -n %libplumbgpl
-%{_libdir}/libplumbgpl.so.%{plumbgplmajor}
-%{_libdir}/libplumbgpl.so.%{plumbgplmajor}.*
-
-#---------------------------------------------------------
-%define stonithmajor 1
-%define libstonith %mklibname stonith %stonithmajor
-
-%package -n %libstonith
-Summary:	Reusable cluster libraries
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-Obsoletes:	%{_lib}heartbeat-stonith1 < 3.0.0-1
-
-%description -n %libstonith
-A collection of libraries that are useful for writing cluster managers
-such as Pacemaker.
-
-%files -n %libstonith
-%{_libdir}/libstonith.so.%{stonithmajor}
-%{_libdir}/libstonith.so.%{stonithmajor}.*
-
-#---------------------------------------------------------
-
-%package devel 
-Summary: Headers and libraries for writing cluster managers
-Group: Development/Other
-Requires: %{liblrm} = %{version}-%{release}
-Requires: %{libpils} = %{version}-%{release}
-Requires: %{libplumb} = %{version}-%{release}
-Requires: %{libplumbgpl} = %{version}-%{release}
-Requires: %{libstonith} = %{version}-%{release}
-Obsoletes: %{_lib}heartbeat1-devel < 3.0.0-1
-Obsoletes: %{_lib}heartbeat-pils1-devel < 3.0.0-1
-Obsoletes: %{_lib}heartbeat-stonith1-devel < 3.0.0-1
-
-%description devel
-Headers and shared libraries for a useful for writing cluster managers 
-such as Pacemaker.
-
-%files devel
-%defattr(-,root,root)
+%files -n %{devname}
 %dir %{_libdir}/heartbeat
 %dir %{_libdir}/heartbeat/plugins
 %dir %{_libdir}/heartbeat/plugins/test
@@ -250,25 +201,10 @@ such as Pacemaker.
 %{_libdir}/heartbeat/transient-test.sh
 %{_libdir}/heartbeat/base64_md5_test
 %{_libdir}/heartbeat/logtest
+%{_libdir}/heartbeat/plugins/test/test.so
 %{_includedir}/clplumbing
 %{_includedir}/heartbeat
 %{_includedir}/stonith
 %{_includedir}/pils
 %{_datadir}/cluster-glue/lrmtest
-%{_libdir}/heartbeat/plugins/test/test.so
-
-
-
-%changelog
-* Fri Dec 16 2011 Alexander Khrukin <akhrukin@mandriva.org> 1.0.9-1mdv2011.0
-+ Revision: 742710
-- version update 1.0.9
-
-* Thu Nov 03 2011 Andrey Bondrov <abondrov@mandriva.org> 1.0.8-1
-+ Revision: 716120
-- Add patch0 to fix build issues with glib
-- imported package cluster-glue
-
-  + Leonardo Coelho <leonardoc@mandriva.org>
-    - Created package structure for cluster-glue.
 
