@@ -1,2 +1,4 @@
+removed_sources:
+  glue-1.0.10.tar.bz2: 8ef11b25846073360a884d78cc57f478a2cda333
 sources:
-  "glue-1.0.10.tar.bz2": 8ef11b25846073360a884d78cc57f478a2cda333
+  glue-1.0.11.tar.bz2: 283c9d530940cf17a8d914698f55c401969ef8cd
