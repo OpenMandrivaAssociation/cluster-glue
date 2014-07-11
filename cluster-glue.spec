@@ -22,7 +22,7 @@
 Summary:	Reusable cluster components
 Name:		cluster-glue
 Version:	1.0.11
-Release:	6
+Release:	7
 License:	GPLv2+ and LGPLv2+
 Url:		http://linux-ha.org/wiki/Cluster_Glue
 Group:		System/Libraries
