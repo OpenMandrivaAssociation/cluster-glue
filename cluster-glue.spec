@@ -35,6 +35,7 @@ BuildRequires:	xsltproc
 BuildRequires:	bzip2-devel
 BuildRequires:	libtool-devel
 BuildRequires:	net-snmp-devel
+BuildRequires:	libaio-devel
 BuildRequires:	pkgconfig(glib-2.0)
 BuildRequires:	pkgconfig(libcurl)
 BuildRequires:	pkgconfig(libxml-2.0)
