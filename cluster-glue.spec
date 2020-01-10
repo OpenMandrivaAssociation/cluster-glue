@@ -106,7 +106,7 @@ such as Pacemaker.
 
 %prep
 %setup -qn %{upstreamprefix}%{upstreamversion}
-%apply_patches
+%autopatch -p1
 
 %build
 #./autogen.sh
