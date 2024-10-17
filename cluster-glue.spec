@@ -24,7 +24,7 @@ Name:		cluster-glue
 Version:	1.0.11
 Release:	10
 License:	GPLv2+ and LGPLv2+
-Url:		http://linux-ha.org/wiki/Cluster_Glue
+Url:		https://linux-ha.org/wiki/Cluster_Glue
 Group:		System/Libraries
 Source0:	http://hg.linux-ha.org/glue/archive/%{upstreamversion}.tar.bz2
 Patch0:		cluster-glue-automake-1.13.patch
